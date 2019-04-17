@@ -1,0 +1,47 @@
+This is pBibTeX, Version 0.99d-j0.33 (utf8.euc) (TeX Live 2015/dev/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: slackbot-specification.aux
+The style file: ipsjunsrt.bst
+Database file #1: mybibdata.bib
+You've used 5 entries,
+            2334 wiz_defined-function locations,
+            579 strings with 4670 characters,
+and the built_in function-call counts, 688 in all, are:
+= -- 50
+> -- 20
+< -- 0
++ -- 10
+- -- 5
+* -- 47
+:= -- 120
+add.period$ -- 5
+call.type$ -- 5
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 5
+duplicate$ -- 44
+empty$ -- 60
+format.name$ -- 10
+if$ -- 155
+int.to.chr$ -- 0
+int.to.str$ -- 5
+missing$ -- 0
+newline$ -- 18
+num.names$ -- 5
+pop$ -- 10
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 25
+stack$ -- 0
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 5
+width$ -- 6
+write$ -- 42
+is.kanji.str$ -- 35

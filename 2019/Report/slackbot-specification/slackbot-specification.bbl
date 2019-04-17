@@ -1,0 +1,25 @@
+\begin{thebibliography}{1}
+
+\bibitem{slack}
+Slack: When work happens, Slack (online), \urle{https://slack.com/}
+  \refdatee{2019-04-15}.
+
+\bibitem{slack-outgoing}
+Slack: Outgoing Webhooks, Slack (online),
+  \urle{https://api.slack.com/custom-integrations/outgoing-webhooks}
+  \refdatee{2019-04-15}.
+
+\bibitem{slack-incoming}
+Slack: Incoming Webhooks, Slack (online),
+  \urle{https://api.slack.com/incoming-webhooks} \refdatee{2019-04-15}.
+
+\bibitem{postalAPI}
+zip.cgis.biz:
+  郵便番号検索API，zip.cgis.biz（オンライン），\urlj{http://zip.cgis.biz/}
+  \refdatej{2019-04-15}.
+
+\bibitem{heroku}
+heroku: heroku, heroku (online), \urle{https://jp.heroku.com/}
+  \refdatee{2019-04-15}.
+
+\end{thebibliography}

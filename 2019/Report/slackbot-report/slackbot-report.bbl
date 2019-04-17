@@ -1,0 +1,16 @@
+\begin{thebibliography}{1}
+
+\bibitem{slack}
+Slack: Where work happens, Slack (online), \urle{https://slack.com/}
+  \refdatee{2019-04-15}.
+
+\bibitem{slack-incoming}
+Slack: Incoming Webhooks, Slack (online),
+  \urle{https://api.slack.com/incoming-webhooks} \refdatee{2019-04-15}.
+
+\bibitem{slack-outgoing}
+Slack: Outgoing Webhooks, Slack (online),
+  \urle{https://api.slack.com/custom-integrations/outgoing-webhooks}
+  \refdatee{2019-04-15}.
+
+\end{thebibliography}

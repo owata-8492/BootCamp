@@ -1,0 +1,116 @@
+\documentclass[12pt]{jsarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{cite}
+\textheight = 25truecm
+\textwidth = 18truecm
+\topmargin = -1.5truecm
+\oddsidemargin = -1truecm
+\evensidemargin = -1truecm
+\marginparwidth = -1truecm
+
+\def\theenumii{\Alph{enumii}}
+\def\theenumiii{\alph{enumiii}}
+\def\labelenumi{(\theenumi)}
+\def\labelenumiii{(\theenumiii)}
+\def\theenumiv{\roman{enumiv}}
+\def\labelenumiv{(\theenumiv)}
+\usepackage{comment}
+\usepackage{url}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% sty/ にある研究室独自のスタイルファイル
+\usepackage{jtygm}  % フォントに関する余計な警告を消す
+\usepackage{nutils} % insertfigure, figref, tabref マクロ
+
+\def\figdir{./figs} % 図のディレクトリ
+\def\figext{pdf}    % 図のファイルの拡張子
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 表題
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+{\LARGE 2019年度B4新人研修課題 SlackBot報告書(佐藤)}
+\end{center}
+
+\begin{flushright}
+  2019/4/15\\
+  佐藤 宏樹
+\end{flushright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 概要
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{概要}
+\label{sec:introduction}
+本資料は，2019年度B4新人研修課題にて作成したSlackBotプログラムの作成報告書である．SlackBotとは，チャットツールであるSlack\cite{slack}において，特定の作業を自動で行うプログラムのことである．本資料では，課題内容，理解できなかった部分，作成できなかった機能，および自主的に作成した機能について述べる．
+
+\section{課題内容}
+Rubyを用いてSlackBotプログラムを作成する．課題として，以下の2つの機能を実装する．
+
+\begin{enumerate}
+\item 任意の文字列を発言するプログラムの作成\\
+  SlackBotプログラムの作成には，Rubyを用いる．使用するRubyのバージョンは2.5.1である．また，以下の2つの機能をもつSlackBotクラスを用いる．
+  \begin{enumerate}
+  \item SlackのIncoming Webhook\cite{slack-incoming}を利用し，発言する機能
+  \item SlackのOutgoing Webhook\cite{slack-outgoing}によって発言を取得した場合，反応する機能
+  \end{enumerate}
+  上記2つの機能を持つSlackBotクラスを継承したクラスを新たに作成し，以下の機能を実装する．
+  \begin{enumerate}
+  \item 受信した発言の中に``「○○○」と言って''という文字列があった場合は， ``○○○''と発言する．
+  \end{enumerate}
+\item SlackBotプログラムへの機能追加\\
+  SlackBotプログラムへ機能を追加する．Slack以外のWebサービスのAPIやWebhookを利用した機能を追加する．
+\end{enumerate}
+
+\section{理解できなかった部分}
+本課題において理解できなかった部分は，SlackBotクラスにおける\verb|post_message|メソッドの挙動である．プログラムを呼ばれた際に返答するSlackBotクラスのメソッド\verb|naive_respond|は，HTTPレスポンスを返り値としているが，\verb|post_message|メソッドにおいては\verb|http.post|メソッドによってPOSTした返り値が\verb|res|に代入され，この\verb|res|が\verb|post_message|メソッドの返り値となっている．プログラム自体は正しく動作するのだが，これでは2回POSTされてしまうのではないかと疑問に思った．\ref{sec:method}章に，付録として該当するメソッド部分を載せる．
+
+\section{作成できなかった機能}
+課題内において作成できなかった機能はない．本プログラムに対して追加できると考えたが作成できなかった機能を以下に示す．
+
+\begin{enumerate}
+\item 設定したOutgoing Webhook以外からのPOSTを拒否する機能\\
+  現状の実装では，誰でもSlackになりすましてPOSTをおこない，Botを動作させることが可能となってしまう．この問題について，自身が設定したOutgoing Webhookのみで動作するようにする必要がある．
+\item プログラム上の同じ機能を一度に複数使用する機能\\
+  本プログラムでは，1つの投稿メッセージに対して，プログラム上の機能が1度しか起動しないようになっている(ただし，投稿メッセージがどの機能の起動条件も満たさない場合は投稿に反応しない)．投稿メッセージの解析方法や，各機能の起動条件を改良することで，1つのメッセージで同じ機能を反復して使えるのではないかと考えられる．
+\end{enumerate}
+
+\section{自主的に作成した機能}
+課題外において自主的に作成した機能はないが，機能追加の課題において作成した機能を以下に示す．
+
+\begin{enumerate}
+\item 入力された郵便番号に対応する県名と市区町村名を答える機能\\
+  取得した投稿が ``@Hirobot (7桁の数字)''という形式であった場合，本プログラムは入力された数字を郵便番号とみなし，対応する県名と市町村名を投稿する．詳細は別資料「2019年度B4新人研修課題SlackBot仕様書(佐藤)」に記載する．
+\end{enumerate}
+
+\section{付録}\label{sec:method}
+\subsection{post\_messageメソッド}
+\begin{verbatim}
+def post_message(string, options = {})
+    payload = options.merge({text: string})
+    uri = URI.parse(@incoming_webhook)
+    res = nil
+    json = payload.to_json
+    request = "payload=" + json
+
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      res = http.post(uri.request_uri, request)
+    end
+
+    return res
+  end
+\end{verbatim}
+
+\subsection{naive\_respondメソッド}
+\begin{verbatim}
+  def naive_respond(params, options = {})
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
+    user_name = params[:user_name] ? "@#{params[:user_name]}" : ""
+    return {text: "<#{user_name}> Hi!"}.merge(options).to_json
+  end
+\end{verbatim}
+
+\bibliographystyle{ipsjunsrt}
+\bibliography{mybibdata}
+\end{document}

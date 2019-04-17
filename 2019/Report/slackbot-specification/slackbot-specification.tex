@@ -1,0 +1,219 @@
+\documentclass[12pt]{jsarticle}
+\usepackage[dvipdfmx]{graphicx}
+\textheight = 25truecm
+\textwidth = 18truecm
+\topmargin = -1.5truecm
+\oddsidemargin = -1truecm
+\evensidemargin = -1truecm
+\marginparwidth = -1truecm
+
+\def\theenumii{\Alph{enumii}}
+\def\theenumiii{\alph{enumiii}}
+\def\labelenumi{(\theenumi)}
+\def\labelenumiii{(\theenumiii)}
+\def\theenumiv{\roman{enumiv}}
+\def\labelenumiv{(\theenumiv)}
+\usepackage{comment}
+\usepackage{url}
+\usepackage{cite}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% sty/ にある研究室独自のスタイルファイル
+\usepackage{jtygm}  % フォントに関する余計な警告を消す
+\usepackage{nutils} % insertfigure, figref, tabref マクロ
+
+\def\figdir{./figs} % 図のディレクトリ
+\def\figext{pdf}    % 図のファイルの拡張子
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 表題
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+{\LARGE 2019年度B4新人研修課題 SlackBot仕様書(佐藤)}
+\end{center}
+
+\begin{flushright}
+  2019/4/15\\
+  佐藤 宏樹
+\end{flushright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 概要
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{概要}
+\label{sec:introduction}
+本資料は，2019年度B4新人研修課題にて作成したSlackBotプログラムの仕様についてまとめたものである．SlackBotとは，チャットツールであるSlack\cite{slack}において，特定の作業を自動で行うプログラムのことである．
+
+\section{対象とする利用者}\label{sec:users}
+本プログラムでは，以下の2つのアカウントを所有するユーザを対象とする．
+\begin{enumerate}
+\item Slackアカウント
+\item GitHubアカウント
+\end{enumerate}
+
+\section{機能}\label{sec:funcs}
+本プログラムの動作の流れを図\ref{fig1}に示す．
+また，図\ref{fig1}について，処理の流れを以下で説明する．
+なお，以降，ユーザおよび本プログラムの投稿メッセージは``''で囲まれた部分で示す．
+
+\begin{enumerate}
+\item ユーザが，``@Hirobot''から始まるメッセージを投稿する．
+\item 本プログラムが，投稿されたメッセージをSlackの機能であるOutgoing Webhook\cite{slack-outgoing}を用いてリクエストメッセージとして受け取る．Outgoing Webhookとは，特定の文字列が投稿された場合に，指定したURLにデータをPOSTする機能である．
+\item 本プログラムが，受け取った内容を処理したのち，処理したメッセージをSlackの機能であるIncoming Webhook\cite{slack-incoming}を用いてSlack上の指定したチャンネルに投稿する．Incoming Webhookとは，指定したURLにPOSTされた文字列をSlackへ送信する機能である．
+\item 本プログラムによるチャンネルへの投稿が，ユーザのクライアント上に反映される．
+\end{enumerate}
+
+\insertfigure[0.8]{fig1}{fig1}{処理の流れ}{Processing flow}
+\newpage
+
+また，本プログラムがもつ3つの機能を以下に述べる．
+
+\begin{description}
+\item[(機能1)]\label{func1} 呼びかけに応じる機能\\
+  リクエストメッセージが``@Hirobot''であった場合，``@(投稿したユーザのユーザ名) Hi!''と投稿する．
+\item[(機能2)]\label{func2} 指定した文字列を投稿する機能\\
+  リクエストメッセージが``@Hirobot 「(任意の文字列)」と言って''という形式であった場合， ``(任意の文字列)''と投稿する．ただし，リクエストメッセージに``「(任意の文字列)」と言って''という文字列が複数含まれていた場合は，投稿内容が最長となる文字列を投稿する．例として，ユーザが``「あいうえお」と言って，「かきくけこ」と言って''と投稿した場合，本プログラムは``あいうえお」と言って，「かきくけこ''と投稿する．
+\item[(機能3)]\label{func3} 郵便番号に対し市区町村名を答える機能\\
+  リクエストメッセージが``@Hirobot (7桁の数字)''という形式であった場合，本プログラムは(7桁の数字)部分を郵便番号とし，該当する県と市区町村の名前を投稿する．たとえば，ユーザが``@Hirobot 7000011''と投稿した場合，本プログラムは〒700-0011に対応した住所である``岡山県岡山市北区学南町''と投稿する．該当する県名と市区町村名がなかった場合，``エラー！存在しない郵便番号です''と投稿する．郵便番号に対応した県名・市区町村名は，郵便番号検索API\cite{postalAPI}を使用して情報を取得する．
+\end{description}
+
+\newpage
+\section{動作環境および動作確認環境}\label{sec:env}
+\subsection{動作環境}
+本プログラムはHeroku\cite{heroku}上で動作する．Herokuとは，PaaSと呼ばれる形態のサービスである．PaaSとは，アプリケーションを実行するためのプラットフォームをインターネットを介して提供するサービスである．表\ref{tab:env}に，本プログラムを動作させるHerokuの環境を示す．
+
+\begin{table}[htb]
+  \begin{center}
+    \caption{動作環境}\label{tab:env}
+    \ecaption{Confirmed run under this environment.}
+    \begin{tabular}{l|l}
+      \hline\hline
+      \multicolumn{1}{l|}{項目} & \multicolumn{1}{l}{内容}\\
+      \hline
+      OS & Ubuntu 18.04.2 LTS\\
+      CPU & Intel(R) Xeon(R) CPU E5-2670 v2 @ 2.50GHz\\
+      メモリ &512MB\\
+      Ruby &ruby 2.5.1\\
+      Ruby Gem & Bundler version 2.0.1\\
+      & json 2.1.0\\
+      & mustermann 1.0.2\\
+      & rack 2.0.4\\
+      & rack-protection 2.0.1\\
+      & sinatra 2.0.1\\
+      & tilt 2.0.8\\
+      & xml-simple 1.1.5\\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\subsection{動作確認済み環境}
+表\ref{tab:env}に示す環境にて，動作確認済みである．
+
+\section{使用方法}
+
+\subsection{環境構築}
+
+\subsubsection{概要}
+本プログラムを実行するために必要な環境構築の手順を以下に示す．
+
+\begin{enumerate}
+\item 本プログラムのFork，clone
+\item SlackアカウントのIncoming Webhookの設定
+\item Herokuアカウントの作成と設定
+\item SlackアカウントのOutgoing Webhookの設定
+\end{enumerate}
+
+\subsubsection{本プログラムのFork，clone}
+本プログラムをローカルリポジトリに入れるため，GitHubより\verb|Fork|および\verb|clone|する．手順を以下に示す．
+
+\begin{enumerate}
+\item GitHubにて，\verb|https://github.com/owata-8492/BootCamp/tree/master/2019/Slackbot|を\verb|Fork|する．
+\item ターミナルにて，以下のとおり入力する．\\
+  \verb|$git clone http://github.com/owata-8492/BootCamp/2019/Slackbot.git|
+\end{enumerate}
+
+\subsubsection{SlackアカウントのIncoming Webhookの設定}\label{subsubsec:webhook}
+Slackの機能であるIncoming Webhook\cite{slack-incoming}を利用するための設定を行う．設定の手順を以下に示す．
+\begin{enumerate}
+\item \verb|https://slack.com/intl/ja-jp|より，Slackアカウントにログインする．
+\item ページ左上のチーム名から「Slackをカスタマイズ」を選択する．
+\item 「Menu」から「App管理」を選択する．
+\item ページ左の「カスタムインテグレーション」を選択する．\label{it:step4}
+\item 「Incoming Webhook」を選択し「設定を追加」をクリックする．
+\item 項目「チャンネルへの投稿」を設定する．Botが送信するチャンネルを選択する．
+\item 「Incoming Webhookインテグレーションの追加」をクリックする．
+\item 項目「Webhook URL」について，表示されているURLをコピーする．\label{it:step8}
+\item 項目「名前をカスタマイズ」を設定する．「Hirobot」と入力する．
+\item 「設定を保存する」をクリックする．
+\end{enumerate}
+
+\subsubsection{Herokuアカウントの作成と設定}\label{subsubsec:heroku}
+本プログラムをHeroku上にデプロイするために，Herokuアカウントの作成と設定を行う．手順を以下に示す．
+\begin{enumerate}
+\item \verb|https://www.heroku.com/|よりHerokuにアクセスし，「無料で新規登録」から新規のアカウントを登録する．
+\item 登録したアカウントでログインし，「Getting Started on Heroku」の使用する言語として「Ruby」を選択する．
+\item 「I'm ready to start」をクリックし「Download the Heroku CLI for...」からOSを選択する．
+\item 「Download the Heroku CLI for...」をクリックして表示されるコマンドを用いてCLIをダウンロードする．
+\item 以下のコマンドを実行し，Herokuにログインする．
+\begin{verbatim}
+$ heroku login
+\end{verbatim}
+\item 作成したアプリケーションのディレクトリに移動して以下のコマンドを実行し，Heroku上にアプリケーションを生成する．\label{it:step6}
+\begin{verbatim}
+$ cd ~/<myapp>
+$ heroku create <myapp_name>
+\end{verbatim}
+ ここで，\verb|<myapp>|は作成したアプリケーションのディレクトリであり，\verb|<myapp_name>|は任意のアプリケーション名である．
+\item 以下のコマンドを実行し，Herokuの環境変数にWebhook URLを設定する．\\
+\verb|$heroku config:set INCOMING_WEBHOOK_URL="<webhook_url>"|\\
+ここで，\verb|<webhook_url>|は，\ref{subsubsec:webhook}項(\ref{it:step8})で取得したURLである．
+\item ファイル\verb|settings.yml.sample|に，取得したIncoming Webhook URLを書き込む．また，ファイル名を\verb|settings.yml|に変更する．
+\end{enumerate}
+
+\subsubsection{SlackアカウントのOutgoing Webhookの設定}
+Slackが提供しているOutgoing Webhook\cite{slack-outgoing}の利用するための設定を行う．設定の手順を以下に示す．
+\begin{enumerate}
+\item \ref{subsubsec:webhook}項の(\ref{it:step4})までを同様に行う．
+\item 「Outgoing Webhook」をクリックし，「設定を追加」をクリックする．
+\item 「Outgoing Webhookインテグレーションの追加」をクリックする．
+\item 項目「チャンネル」を設定する．Botが投稿を受け取ることのできるチャンネルを選択する．
+\item 項目「引き金となる言葉」を設定する．「@Hirobot」と入力する．
+\item 項目「URL」を設定する．「https://\verb|<myapp_name>|.herokuapp.com/slack」と入力する．\\
+  ここで，\verb|<myapp_name>|とは，\ref{subsubsec:heroku}項(\ref{it:step6})にて作成したアプリケーション名である．
+\item 項目「名前をカスタマイズ」を設定する．「Hirobot」と入力する．
+\item 「設定を保存する」をクリックする．
+\end{enumerate}
+
+\subsection{実行方法}
+本プログラムは，\verb|commit|作成後，Heroku上にデプロイすることで実行することができる．デプロイするためのコマンドを以下に示す．
+\begin{verbatim}
+$git push heroku master
+\end{verbatim}
+
+デプロイ後は，Slack上において特定の投稿をすることで自動的に動作する．本プログラムがもつ機能およびその利用のための投稿内容は\ref{sec:funcs}章に記載している．
+
+\section{エラー処理と保証しない動作}
+
+\subsection{エラー処理}
+本プログラムにおいては，特に行ったエラー処理はない．
+
+\subsection{保証しない動作}
+本プログラムの保証しない動作を以下に示す．
+
+\begin{enumerate}
+\item SlackのOutgoing Webhook以外からPOSTリクエストを受け取った場合の動作
+\item \ref{sec:env}章で述べた動作環境・動作確認済み環境・プラットフォーム外でのプログラム実行
+\item 使用しているAPIおよびプラットフォームの提供終了時，または仕様変更時の動作
+\end{enumerate}
+
+\bibliographystyle{ipsjunsrt}
+\bibliography{mybibdata}
+
+%\begin{thebibliography}{9}
+%\bibitem{slack-outgoing} Outgoing Webhook: \texttt{https://api.slack.com/custom-integrations/outgoing-webhooks} (2019/4/11)
+%\bibitem{slack-incoming} Incoming Webhook: \texttt{https://api.slack.com/incoming-webhooks} (2019/4/11)
+%\bibitem{postalAPI} 郵便番号検索API: \texttt{http://zip.cgis.biz/} (2019/4/11)
+%\bibitem{heroku} Heroku: \texttt{https://jp.heroku.com/} (2019/4/11)
+%\end{thebibliography}
+\end{document}
