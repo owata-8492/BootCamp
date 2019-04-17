@@ -1,4 +1,7 @@
 # coding: utf-8
+<<<<<<< HEAD
+# coding: utf-8
+
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'sinatra'
@@ -73,6 +76,4 @@ post '/slack' do
     town_name= slackbot.get_town_name(p_code)
     return slackbot.post_message(town_name)
   end
-  slackbot.naive_respond(params, username: "Bot")
-
 end

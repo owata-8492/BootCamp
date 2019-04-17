@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # coding: utf-8
 require 'json'
 require 'uri'
@@ -31,6 +32,7 @@ class SlackBot
 
   def naive_respond(params, options = {})
     return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
+
     user_name = params[:user_name] ? "@#{params[:user_name]}" : ""
     return {text: "<#{user_name}> Hi!"}.merge(options).to_json
   end
